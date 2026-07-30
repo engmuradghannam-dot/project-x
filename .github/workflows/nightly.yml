@@ -1,0 +1,81 @@
+name: 🌙 Nightly Experiments & Benchmarks
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # Every day at 2 AM UTC
+  workflow_dispatch:
+
+jobs:
+  # ═══════════════════════════════════════════════════
+  # 🧪 Nightly Experiments
+  # ═══════════════════════════════════════════════════
+  nightly-experiments:
+    name: 🧪 Nightly Experiments
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 📦 Install dependencies
+        run: |
+          pip install -e ".[dev,experiment]"
+
+      - name: 🧪 Run Full Experiment Suite
+        run: |
+          python -m src.experiments.runner --nightly --output-dir=nightly-results/
+
+      - name: 📊 Generate Report
+        run: |
+          python -m src.experiments.report --input-dir=nightly-results/ --output=nightly-report.md
+
+      - name: 📊 Upload Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-experiment-results
+          path: |
+            nightly-results/
+            nightly-report.md
+
+  # ═══════════════════════════════════════════════════
+  # ⚡ Performance Benchmarks
+  # ═══════════════════════════════════════════════════
+  benchmarks:
+    name: ⚡ Performance Benchmarks
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 📦 Install dependencies
+        run: |
+          pip install -e ".[dev,test]"
+          pip install pytest-benchmark
+
+      - name: ⚡ Run Benchmarks
+        run: |
+          pytest tests/benchmarks/ --benchmark-only --benchmark-json=benchmark-results.json
+
+      - name: 📊 Upload Benchmarks
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results
+          path: benchmark-results.json
+
+      - name: 📊 Store benchmark result
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          tool: 'pytest'
+          output-file-path: benchmark-results.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: true

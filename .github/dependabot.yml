@@ -1,0 +1,55 @@
+version: 2
+updates:
+  # Python dependencies
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "06:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "engmuradghannam-dot"
+    labels:
+      - "dependencies"
+      - "python"
+    commit-message:
+      prefix: "📦"
+      prefix-development: "📦 dev"
+      include: "scope"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "engmuradghannam-dot"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "🔧"
+      include: "scope"
+
+  # Docker
+  - package-ecosystem: "docker"
+    directory: "/docker"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "engmuradghannam-dot"
+    labels:
+      - "dependencies"
+      - "docker"
+    commit-message:
+      prefix: "🐳"
+      include: "scope"

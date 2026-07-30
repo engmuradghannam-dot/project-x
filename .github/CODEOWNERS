@@ -1,0 +1,17 @@
+# Global owners
+* @engmuradghannam-dot
+
+# Core module
+/src/core/ @engmuradghannam-dot
+
+# API
+/src/api/ @engmuradghannam-dot
+
+# Experiments
+/src/experiments/ @engmuradghannam-dot
+
+# CI/CD
+/.github/ @engmuradghannam-dot
+
+# Docker
+/docker/ @engmuradghannam-dot

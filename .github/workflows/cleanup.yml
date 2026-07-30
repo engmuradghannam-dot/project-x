@@ -1,0 +1,29 @@
+name: 🧹 Cleanup Old Artifacts & Runs
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # Every Sunday at midnight
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    name: 🧹 Cleanup
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🧹 Delete old workflow runs
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          retain_days: 30
+          keep_minimum_runs: 10
+
+      - name: 🧹 Delete old artifacts
+        uses: geekyeggo/delete-artifact@v4
+        with:
+          name: |
+            unit-test-results-*
+            integration-test-results
+            e2e-test-results
+            security-reports
+          failOnError: false
