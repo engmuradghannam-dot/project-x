@@ -20,6 +20,7 @@ from .experiments.runner import ExperimentRunner
 from .experiments.registry import ExperimentRegistry
 from .gpu_virtualization import VirtualGPU, GPUBackend, GPUManager
 from .gpu_cluster import GPUCluster
+from .gpu_super_cluster import GPUSuperCluster
 from .cluster_network import ClusterNetwork
 from .ai_bridge import AIGPUBridge
 from .murad_ai import MuradAI
@@ -34,6 +35,7 @@ __all__ = [
     "GPUBackend",
     "GPUManager",
     "GPUCluster",
+    "GPUSuperCluster",
     "ClusterNetwork",
     "AIGPUBridge",
     "MuradAI",
