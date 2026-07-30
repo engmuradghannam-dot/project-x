@@ -1,63 +1,76 @@
 #!/usr/bin/env python3
 """
-GPU Cluster Demo - 100 Parallel GPU Nodes
-Shows how to run experiments across 100 GPU instances
+GPU Cluster Demo - 100 Parallel Nodes
+Demonstrates running experiments across 100 GPU instances
 """
 
 import sys
+import time
+import numpy as np
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
-from src.gpu_cluster.parallel_experiment import ParallelExperimentRunner
+from src.gpu_cluster import GPUCluster
+from src.cluster_network import ClusterNetwork
+from rich.console import Console
+
+console = Console()
+
+
+def bitcoin_experiment(node, sample_size=10000, **kwargs):
+    """Bitcoin key analysis experiment."""
+    keys = np.random.randint(0, 2**64, size=sample_size, dtype=np.uint64)
+
+    features = np.zeros((sample_size, 8), dtype=np.float32)
+    for i in range(min(sample_size, 1000)):
+        k = keys[i]
+        bytes_arr = np.array([(k >> (8*j)) & 0xFF for j in range(8)], dtype=np.float32)
+        features[i, 0] = np.mean(bytes_arr)
+        features[i, 1] = np.std(bytes_arr)
+
+    return {
+        "node_id": node.node_id,
+        "node_type": node.gpu_type,
+        "sample_size": sample_size,
+        "mean_feature": float(np.mean(features[:1000, 0])),
+    }
 
 
 def main():
     print("=" * 70)
-    print("  PROJECT X - 100 GPU CLUSTER DEMO")
+    print("PROJECT X - 100 GPU CLUSTER DEMO")
     print("=" * 70)
 
-    # Create runner with 100 nodes
-    print("\n[1] Initializing 100 GPU nodes...")
-    runner = ParallelExperimentRunner(num_nodes=100)
+    cluster = GPUCluster(num_nodes=100)
+    network = ClusterNetwork(cluster)
+    cluster.print_status()
 
-    # Run MuradEngine Test 7 (Scaling)
-    print("\n[2] Running MuradEngine Test 7 (Scaling)")
-    print("    Target: 100,000 keys across 100 nodes")
-    print("    Each node: 1,000 keys")
+    tasks = [
+        {"name": f"bitcoin_analysis_node_{i}", "params": {"sample_size": 10000 + i * 1000}}
+        for i in range(100)
+    ]
 
-    results = runner.run_muradengine_test7(
-        total_keys=100000,
-        keys_per_node=1000
-    )
+    print("\nExecuting 100 tasks in parallel...")
+    start = time.time()
+    results = cluster.execute_parallel(tasks, bitcoin_experiment)
+    total_time = time.time() - start
 
-    # Generate report
-    print("\n[3] Generating report...")
-    report = runner.generate_report(results, "MuradEngine Test 7")
-    print(report)
-
-    # Save report
-    with open("test7_parallel_report.txt", "w") as f:
-        f.write(report)
-
-    print("\n[4] Report saved to: test7_parallel_report.txt")
-
-    # Show Bitcoin batch example
-    print("\n[5] Running Bitcoin analysis (1M samples)...")
-    btc_results = runner.run_bitcoin_batch(
-        total_samples=1000000,
-        samples_per_node=10000
-    )
-
-    btc_report = runner.generate_report(btc_results, "Bitcoin Analysis")
-    print(btc_report)
-
-    with open("bitcoin_parallel_report.txt", "w") as f:
-        f.write(btc_report)
+    aggregated = network.aggregate_results(results)
 
     print("\n" + "=" * 70)
-    print("  DEMO COMPLETE")
+    print("RESULTS")
     print("=" * 70)
+    print(f"Total tasks: {aggregated['total_tasks']}")
+    print(f"Successful: {aggregated['successful']}")
+    print(f"Failed: {aggregated['failed']}")
+    print(f"Success rate: {aggregated['success_rate']:.1f}%")
+    print(f"Total time: {total_time:.2f}s")
+    print(f"Throughput: {aggregated['total_tasks']/total_time:.1f} tasks/sec")
+
+    cluster.shutdown()
+
+    print("\nDEMO COMPLETE!")
 
 
 if __name__ == "__main__":

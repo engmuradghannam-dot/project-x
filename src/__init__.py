@@ -1,7 +1,7 @@
-\"\"\"
+"""
 Project X - Advanced Experimentation Framework
 Auto-connects GPU on startup
-\"\"\"
+"""
 
 __version__ = "0.1.0"
 __author__ = "Murad Ghannam"
@@ -19,6 +19,8 @@ from .core.logger import get_logger
 from .experiments.runner import ExperimentRunner
 from .experiments.registry import ExperimentRegistry
 from .gpu_virtualization import VirtualGPU, GPUBackend, GPUManager
+from .gpu_cluster import GPUCluster
+from .cluster_network import ClusterNetwork
 from .ai_bridge import AIGPUBridge
 from .murad_ai import MuradAI
 
@@ -31,6 +33,8 @@ __all__ = [
     "VirtualGPU",
     "GPUBackend",
     "GPUManager",
+    "GPUCluster",
+    "ClusterNetwork",
     "AIGPUBridge",
     "MuradAI",
     "ensure_gpu_connected",
