@@ -3,7 +3,7 @@
 # ═══════════════════════════════════════════════════
 
 # ─── Stage 1: Builder ─────────────────────────────
-FROM python:3.11-slim as builder
+FROM python:3.12-slim as builder
 
 WORKDIR /app
 
@@ -15,7 +15,7 @@ COPY pyproject.toml .
 RUN pip install --no-cache-dir --user -e ".[all]"
 
 # ─── Stage 2: Production ──────────────────────────
-FROM python:3.11-slim as production
+FROM python:3.12-slim as production
 
 LABEL maintainer="Murad Ghannam <eng.murad.ghannam@gmail.com>"
 LABEL version="0.1.0"
